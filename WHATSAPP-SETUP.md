@@ -29,9 +29,9 @@ This guide will help you set up WhatsApp notifications for new orders using Twil
    - **Auth Token** (click to reveal)
 2. Note the WhatsApp Sandbox number (e.g., "+1 415 523 8886")
 
-## Step 4: Add Environment Variables to Vercel
+## Step 4: Add Environment Variables
 
-1. Go to your Vercel project dashboard
+1. Go to your project dashboard
 2. Navigate to **Settings** → **Environment Variables**
 3. Add the following variables:
 
@@ -49,7 +49,7 @@ TWILIO_WHATSAPP_TO=whatsapp:+1234567890
 
 ## Step 5: Deploy and Test
 
-1. Redeploy your application on Vercel
+1. Redeploy your application
 2. Place a test order on your website
 3. You should receive a WhatsApp notification with the order details
 
@@ -65,9 +65,9 @@ For production use, you'll need to:
 
 ### Not receiving notifications?
 
-1. Check that all environment variables are set correctly in Vercel
+1. Check that all environment variables are set correctly in your project settings
 2. Verify your WhatsApp number is connected to the Twilio Sandbox
-3. Check the Vercel logs for any error messages
+3. Check the application logs for any error messages
 4. Ensure your phone number includes the country code (e.g., +1 for US)
 
 ### Message format issues?

@@ -27,4 +27,4 @@ Phone: +1 (323) 544-7099
 
 ---
 
-Built with ❤️ for dachshund lovers
+Dachshund Haven - Premium AKC Registered Puppies
