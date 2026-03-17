@@ -1,0 +1,12 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow cart and checkout pages from indexing
+Disallow: /cart
+Disallow: /checkout
+Disallow: /payment
+Disallow: /confirmation
+
+# Sitemap location
+Sitemap: https://dachshundpuppies.shop/sitemap.xml
