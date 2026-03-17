@@ -7,8 +7,7 @@ export async function POST(request: Request) {
     try {
       body = await request.json()
     } catch (parseError) {
-      console.error("[v0] JSON parsing error:", parseError)
-      console.error("[v0] Raw request body:", await request.text())
+      console.error("JSON parsing error:", parseError)
       return NextResponse.json(
         { success: false, error: "Invalid request format. Please ensure the data is properly formatted JSON." },
         { status: 400 },
@@ -17,15 +16,11 @@ export async function POST(request: Request) {
 
     const { customerInfo, cartItems, paymentMethod, totalAmount } = body
 
-    console.log("[v0] Order data received:", { customerInfo, cartItems, paymentMethod, totalAmount })
-
     if (!customerInfo?.name || !customerInfo?.email || !customerInfo?.phone) {
-      console.error("[v0] Missing required customer fields:", customerInfo)
       return NextResponse.json({ success: false, error: "Missing customer name, email, or phone" }, { status: 400 })
     }
 
     if (!cartItems || cartItems.length === 0) {
-      console.error("[v0] Empty cart")
       return NextResponse.json({ success: false, error: "Cart is empty" }, { status: 400 })
     }
 
@@ -46,8 +41,6 @@ export async function POST(request: Request) {
       status: "pending",
     }
 
-    console.log("[v0] Inserting order:", orderData)
-
     // Try to save to database, but don't fail if it doesn't work
     let order = { id: Date.now().toString(), ...orderData }
     let savedToDb = false
@@ -60,12 +53,11 @@ export async function POST(request: Request) {
       if (!orderError && dbOrder) {
         order = dbOrder
         savedToDb = true
-        console.log("[v0] Order created in database successfully:", order)
       } else if (orderError) {
-        console.warn("[v0] Could not save to database (continuing without DB):", orderError)
+        console.warn("Database save skipped, continuing with email notification")
       }
     } catch (dbError) {
-      console.warn("[v0] Database error (continuing without DB):", dbError)
+      console.warn("Database connection skipped, continuing with email notification")
     }
 
     // Always try to save order items if we have a database order
@@ -84,19 +76,16 @@ export async function POST(request: Request) {
           payment_type: item.paymentType || "full",
         }))
 
-        console.log("[v0] Inserting order items:", orderItems)
         const supabase = await createClient()
         const { error: itemsError } = await supabase.from("order_items").insert(orderItems)
 
         if (itemsError) {
-          console.warn("[v0] Order items creation error (continuing):", itemsError)
+          console.warn("Order items creation skipped")
         }
       } catch (itemsDbError) {
-        console.warn("[v0] Order items database error (continuing):", itemsDbError)
+        console.warn("Order items database operation skipped")
       }
     }
-
-    console.log("[v0] Order items created successfully")
 
     // Prepare orderItems for email
     const emailOrderItems = cartItems.map((item: any) => ({
@@ -107,7 +96,6 @@ export async function POST(request: Request) {
     }))
 
     try {
-      console.log("[v0] Sending order notification emails...")
       const emailResponse = await fetch(`${new URL(request.url).origin}/api/send-order-notification`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -122,19 +110,16 @@ export async function POST(request: Request) {
 
       if (!emailResponse.ok) {
         const errorText = await emailResponse.text()
-        console.error("[v0] Email notification failed:", emailResponse.status, errorText)
-        // Log but don't fail - email issues shouldn't prevent order creation
+        console.error("Email notification error:", errorText)
       } else {
         try {
-          const emailResult = await emailResponse.json()
-          console.log("[v0] Order email notification sent successfully:", emailResult)
+          await emailResponse.json()
         } catch (parseErr) {
-          console.log("[v0] Order email notification sent (couldn't parse response)")
+          // Email sent but response parse failed
         }
       }
     } catch (emailError) {
-      console.error("[v0] Email notification error:", emailError)
-      // Continue - don't fail the order if email fails
+      console.error("Email notification error:", emailError)
     }
 
     try {
@@ -153,18 +138,15 @@ export async function POST(request: Request) {
       })
 
       if (!webhookResponse.ok) {
-        console.warn("[v0] Zapier webhook returned non-200 status:", webhookResponse.status)
-      } else {
-        console.log("[v0] Zapier webhook sent successfully")
+        console.warn("Webhook status:", webhookResponse.status)
       }
     } catch (webhookError) {
-      console.error("[v0] Zapier webhook error:", webhookError)
-      // Continue - don't fail the order if webhook fails
+      console.error("Webhook error:", webhookError)
     }
 
     return NextResponse.json({ success: true, order })
   } catch (error) {
-    console.error("[v0] API error:", error)
+    console.error("Order API error:", error)
     const errorMessage = error instanceof Error ? error.message : "Unknown error"
     return NextResponse.json({ success: false, error: `Server error: ${errorMessage}` }, { status: 500 })
   }
@@ -192,14 +174,13 @@ export async function GET(request: Request) {
     const { data: orders, error } = await query
 
     if (error) {
-      console.error("[v0] Fetch orders error:", error)
+      console.error("Fetch orders error:", error)
       throw error
     }
 
-    console.log("[v0] Fetched orders for admin dashboard:", orders?.length || 0)
     return NextResponse.json({ success: true, orders: orders || [] })
   } catch (error) {
-    console.error("[v0] API error:", error)
+    console.error("Orders API error:", error)
     return NextResponse.json({ success: false, error: "Failed to fetch orders" }, { status: 500 })
   }
 }

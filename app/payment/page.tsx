@@ -59,9 +59,9 @@ export default function PaymentPage() {
       try {
         result = await response.json()
       } catch (parseError) {
-        console.error("[v0] Order creation error: JSON parse failed", parseError)
+        console.error("Order creation error: JSON parse failed", parseError)
         const text = await response.text()
-        console.error("[v0] Response text:", text)
+        console.error("Response text:", text)
         throw new Error(`Invalid response format from server. Please contact support.`)
       }
 
