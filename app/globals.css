@@ -141,4 +141,33 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Hide v0 and Vercel branding elements */
+  [class*="v0"],
+  [class*="vercel"],
+  [id*="v0"],
+  [id*="vercel"],
+  [data-v0],
+  [data-vercel],
+  iframe[src*="v0.app"],
+  iframe[src*="vercel.com"],
+  .v0-logo,
+  .vercel-logo,
+  .v0-watermark,
+  .vercel-watermark,
+  .built-with-v0,
+  [aria-label*="v0"],
+  [aria-label*="Vercel"],
+  [title*="v0"],
+  [title*="Vercel"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
 }
